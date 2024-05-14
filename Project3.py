@@ -18,7 +18,7 @@ xytechCollection = db['Workorder/Location']
 parser = argparse.ArgumentParser(description ='SOMETHING')
 parser.add_argument('--baselight', type=argparse.FileType('r'))
 parser.add_argument('--xytech', type=argparse.FileType('r'))
-parser.add_argument('--process', type=bool)
+parser.add_argument('--process', type='File', help="Video")
 # parser.add_argument('--output')
 
 args = parser.parse_args()
