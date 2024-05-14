@@ -42,77 +42,77 @@ csvFile.close()
 
 print(XY_File)
 
-if args.process:
-    for currentReadLine in BL_File:
-        
-        #print currentReadLine
-        print("\nCurrent read: " + currentReadLine)
 
-        #parse currentReadLine
-        fixFrames = currentReadLine.split()
-        print("Parsed Line: ", fixFrames)
+for currentReadLine in BL_File:
+    
+    #print currentReadLine
+    print("\nCurrent read: " + currentReadLine)
 
-        #pop file location from parseLine
-        currentFolder = fixFrames.pop(0)
-        #parse folder
-        parseFolder = currentFolder.split("/")
-        #pop system location from parseFolder
-        parseFolder.pop(1)
-        #merge parseFolder with file location layout
-        newFolder = "/".join(parseFolder)
+    #parse currentReadLine
+    fixFrames = currentReadLine.split()
+    print("Parsed Line: ", fixFrames)
 
-        print("parseFolder: ", parseFolder)
-        print("newfolder: ", newFolder)
+    #pop file location from parseLine
+    currentFolder = fixFrames.pop(0)
+    #parse folder
+    parseFolder = currentFolder.split("/")
+    #pop system location from parseFolder
+    parseFolder.pop(1)
+    #merge parseFolder with file location layout
+    newFolder = "/".join(parseFolder)
 
-        for techFile in XY_File:
-            #if folder from BL matches folder from Xytech, make currentFolder
-            if newFolder in techFile:
-                currentFolder = techFile.strip()
-                print("Current Folder: ", currentFolder)
+    print("parseFolder: ", parseFolder)
+    print("newfolder: ", newFolder)
 
-        print("Fix Frames: " , fixFrames)
+    for techFile in XY_File:
+        #if folder from BL matches folder from Xytech, make currentFolder
+        if newFolder in techFile:
+            currentFolder = techFile.strip()
+            print("Current Folder: ", currentFolder)
 
-        tempStart = 0
-        tempLast = 0
-        count = 0
-        for numb in fixFrames:
-            csvFile.close()
-            #if error found, pop from parseLine
-            if not numb.isnumeric():
-                continue
-            count += 1
-            #for numbers that are in a row
-            if tempStart == 0:
-                tempStart = numb
-                continue
-            #if numb is start + 1, set last = numb
-            if numb == str(int(tempStart) + 1) or numb == str(int(tempLast) + 1):
-                tempLast = numb
-                continue
-            #check if numb is greater than last + 1
-            elif int(numb) > (int(tempLast) + 1):
-                if int(tempLast) > 0:
-                    print(currentFolder, tempStart + "-" + tempLast)
-                    with open(csvFilename, "a") as csvFile:
-                        csvFile.write(f"{currentFolder},")
-                        csvFile.write(f" {tempStart}-{tempLast},\n")
-                else:
-                    print(currentFolder, tempStart)
-                    with open(csvFilename, "a") as csvFile:
-                        csvFile.write(f"{currentFolder},")
-                        csvFile.write(f" {tempStart}\n")
-                tempStart = numb
-                tempLast = 0
-        if int(tempLast) > 0:
-            print(currentFolder, tempStart + "-" + tempLast)
-            with open(csvFilename, "a") as csvFile:
-                csvFile.write(f"{currentFolder},")
-                csvFile.write(f" {tempStart}-{tempLast},\n")
-        else:
-            print(currentFolder, tempStart)
-            with open(csvFilename, "a") as csvFile:
-                csvFile.write(f"{currentFolder},")
-                csvFile.write(f" {tempStart},\n")
+    print("Fix Frames: " , fixFrames)
+
+    tempStart = 0
+    tempLast = 0
+    count = 0
+    for numb in fixFrames:
+        csvFile.close()
+        #if error found, pop from parseLine
+        if not numb.isnumeric():
+            continue
+        count += 1
+        #for numbers that are in a row
+        if tempStart == 0:
+            tempStart = numb
+            continue
+        #if numb is start + 1, set last = numb
+        if numb == str(int(tempStart) + 1) or numb == str(int(tempLast) + 1):
+            tempLast = numb
+            continue
+        #check if numb is greater than last + 1
+        elif int(numb) > (int(tempLast) + 1):
+            if int(tempLast) > 0:
+                print(currentFolder, tempStart + "-" + tempLast)
+                with open(csvFilename, "a") as csvFile:
+                    csvFile.write(f"{currentFolder},")
+                    csvFile.write(f" {tempStart}-{tempLast},\n")
+            else:
+                print(currentFolder, tempStart)
+                with open(csvFilename, "a") as csvFile:
+                    csvFile.write(f"{currentFolder},")
+                    csvFile.write(f" {tempStart}\n")
+            tempStart = numb
+            tempLast = 0
+    if int(tempLast) > 0:
+        print(currentFolder, tempStart + "-" + tempLast)
+        with open(csvFilename, "a") as csvFile:
+            csvFile.write(f"{currentFolder},")
+            csvFile.write(f" {tempStart}-{tempLast},\n")
+    else:
+        print(currentFolder, tempStart)
+        with open(csvFilename, "a") as csvFile:
+            csvFile.write(f"{currentFolder},")
+            csvFile.write(f" {tempStart},\n")
 
     csvFile.close
 
