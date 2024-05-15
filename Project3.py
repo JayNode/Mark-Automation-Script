@@ -9,10 +9,10 @@ import argparse
 print("\nSTART\n")
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["Jared-db"]
+db = client["mydatabase"]
 
-baselightCollection = db['Folder/Frames']
-xytechCollection = db['Workorder/Location']
+baselightCol = db['Folder_Frames']
+xytechCol= db['Workorder_Location']
 
 #argparse arguments
 parser = argparse.ArgumentParser(description ='SOMETHING')
