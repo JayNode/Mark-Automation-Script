@@ -18,7 +18,7 @@ xytechCollection = db['Workorder/Location']
 parser = argparse.ArgumentParser(description ='SOMETHING')
 parser.add_argument('--baselight', type=argparse.FileType('r'))
 parser.add_argument('--xytech', type=argparse.FileType('r'))
-parser.add_argument('--process', type='File', help="Video")
+# parser.add_argument('--process', type='File', help="Video")
 # parser.add_argument('--output')
 
 args = parser.parse_args()
@@ -31,7 +31,6 @@ if args.xytech:
 #read baselight
 if args.baselight:
     BL_File = args.baselight
-    baselightCollection = BL_File
 
 csvFilename = "fix_these.csv"
 with open(csvFilename, "w") as csvFile:
@@ -117,3 +116,4 @@ for currentReadLine in BL_File:
     csvFile.close
 
 #python3 Project3.py --baselight Baselight_export.txt --xytech Xytech.txt --process True
+#python3 Project3.py --baselight Baselight_export.txt --xytech Xytech.txt
