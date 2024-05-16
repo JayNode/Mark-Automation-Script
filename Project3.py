@@ -11,7 +11,7 @@ def timeCode(currentFolder, frameStart, frameEnd):
     frameRate = 24
     timeS = frameStart / frameRate
     timeE = frameEnd / frameRate
-    
+
     hours = int(times / 3600)
     minutes = int((time % 3600) / 60)
     seconds = int(time % 60)
@@ -150,7 +150,7 @@ if args.process:
     print('db data: ', db.list_collection_names())
     for i in baselightCol.find({},{"_id":0}):
         # timeCode()
-        print('Baselight db data: ', i[])
+        print('Baselight db data: ', i)
 
     for j in xytechCol.find({},{"_id":0}):
         print('Xytech db data: ', j)
