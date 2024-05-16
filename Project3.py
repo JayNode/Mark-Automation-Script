@@ -3,23 +3,34 @@
 import os
 import csv
 import pymongo
-import pandas as pd
 import argparse
+import subprocess
+from frameioclient import FrameioClient
 
-def timeCode(currentFolder, frameStart, frameEnd):
-    frameAmount = 10
-    frameRate = 24
-    timeS = frameStart / frameRate
-    timeE = frameEnd / frameRate
 
-    hours = int(times / 3600)
+def timeCode(frameAmount):
+    frameRate = 60
+    time = frameAmount / frameRate
+    hours = int(time / 3600)
     minutes = int((time % 3600) / 60)
     seconds = int(time % 60)
     frames = int((time - int(time)) * frameRate)
 
-    return "Time Code: ", hours, minutes, seconds, frames
+    return f"{hours}:{minutes}:{seconds}:{frames}"
 
-
+# def processFrames():
+#     ffmpegPath = r"C:\\Users\\Jared\\Desktop\\CSUN\\Spring\\Media\\TheCrucible\\fix_these.csv"
+#     command1 = ["ffmpeg", "-i", "twitch_nft_demo.mp4", "-hide_banner"]
+#     # command2 = ["ffmpeg", "-i", "twitch_nft_demo.mp4", "-r", "1" , "-f", "image2", "image-%3d.png"]
+#     process = subprocess.Popen(command1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    
+#     duration_str = ""
+#     for line in process.stdout.readlines():
+#         decoded = line.decode()
+#         if decoded.startswith("Duration:"):
+#             duration_str = decoded.strip().split(",")[0].strip().split(" ")[1]
+    
+#     return duration_str
 
 print("\nSTART\n")
 
@@ -51,7 +62,7 @@ csvFilename = "fix_these.csv"
 with open(csvFilename, "w") as csvFile:
     csvFile.write("Producer,Operator,Job,Notes\n")
     csvFile.write("Olivia Rodrigo, Johnny Bananas, Dirtfixing, Please clean files noted per Colorist Brock Purdy\n\n")
-    csvFile.write("Locations, Frames\n")
+    csvFile.write("Location, Frames, timecode, thumbnail\n")
 csvFile.close()
 
 print(XY_File)
@@ -118,13 +129,15 @@ for currentReadLine in BL_File:
                 baselightCol.insert_one({currentFolder : f'{tempStart}-{tempLast}'})
                 with open(csvFilename, "a") as csvFile:
                     csvFile.write(f"{currentFolder},")
-                    csvFile.write(f" {tempStart}-{tempLast},\n")
+                    csvFile.write(f" {tempStart}-{tempLast},")
+                    csvFile.write(f"{str(timeCode(int(tempStart)))} - {str(timeCode(int(tempLast)))},\n")
             else:
                 print(currentFolder, tempStart)
                 baselightCol.insert_one({currentFolder : f'{tempStart}'})
                 with open(csvFilename, "a") as csvFile:
                     csvFile.write(f"{currentFolder},")
-                    csvFile.write(f" {tempStart}\n")
+                    csvFile.write(f" {tempStart},")
+                    csvFile.write(f"{str(timeCode(int(tempStart)))},\n")
             tempStart = numb
             tempLast = 0
     if int(tempLast) > 0:
@@ -132,15 +145,17 @@ for currentReadLine in BL_File:
         baselightCol.insert_one({currentFolder : f'{tempStart}-{tempLast}'})
         with open(csvFilename, "a") as csvFile:
             csvFile.write(f"{currentFolder},")
-            csvFile.write(f" {tempStart}-{tempLast},\n")
+            csvFile.write(f" {tempStart}-{tempLast},")
+            csvFile.write(f"{str(timeCode(int(tempStart)))} - {str(timeCode(int(tempLast)))},\n")
     else:
         print(currentFolder, tempStart)
         baselightCol.insert_one({currentFolder : f'{tempStart}'})
         with open(csvFilename, "a") as csvFile:
             csvFile.write(f"{currentFolder},")
-            csvFile.write(f" {tempStart},\n")
+            csvFile.write(f" {tempStart},")
+            csvFile.write(f"{str(timeCode(int(tempStart)))},\n")
 
-    timeCode(currentFolder, tempStart, tempLast)
+    # timeCode(currentFolder, tempStart, tempLast)
 
     csvFile.close
 
@@ -149,12 +164,11 @@ if args.process:
     print()
     print('db data: ', db.list_collection_names())
     for i in baselightCol.find({},{"_id":0}):
-        # timeCode()
         print('Baselight db data: ', i)
 
     for j in xytechCol.find({},{"_id":0}):
         print('Xytech db data: ', j)
-   
+
 
 baselightCol.drop()
 xytechCol.drop()
