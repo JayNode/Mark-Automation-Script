@@ -6,10 +6,25 @@ import pymongo
 import pandas as pd
 import argparse
 
+def timeCode(currentFolder, frameStart, frameEnd):
+    frameAmount = 10
+    frameRate = 24
+    timeS = frameStart / frameRate
+    timeE = frameEnd / frameRate
+    
+    hours = int(times / 3600)
+    minutes = int((time % 3600) / 60)
+    seconds = int(time % 60)
+    frames = int((time - int(time)) * frameRate)
+
+    return "Time Code: ", hours, minutes, seconds, frames
+
+
+
 print("\nSTART\n")
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["mydatabase"]
+db = client["Jareds_db"]
 
 baselightCol = db['Folder_Frames']
 xytechCol= db['Workorder_Location']
@@ -18,8 +33,8 @@ xytechCol= db['Workorder_Location']
 parser = argparse.ArgumentParser(description ='SOMETHING')
 parser.add_argument('--baselight', type=argparse.FileType('r'))
 parser.add_argument('--xytech', type=argparse.FileType('r'))
-# parser.add_argument('--process', type='File', help="Video")
-# parser.add_argument('--output')
+parser.add_argument('--process', dest="process", help="Video process")
+parser.add_argument('--output', dest="output", help="Parameters for XLS")
 
 args = parser.parse_args()
 
@@ -71,15 +86,23 @@ for currentReadLine in BL_File:
 
     print("Fix Frames: " , fixFrames)
 
+    #ADDING TO DB
+    #adding values to db for baselight
+    # baselightCol.insert_one({str(currentFolder) : fixFrames})
+
+    #adding values to db for xytech
+    xytechCol.insert_one({'Xytech workorder 1109' : str(currentFolder)})
+
     tempStart = 0
     tempLast = 0
-    count = 0
     for numb in fixFrames:
         csvFile.close()
         #if error found, pop from parseLine
         if not numb.isnumeric():
             continue
-        count += 1
+
+        # baselightCol.insert_one({str(currentFolder) : numb})
+
         #for numbers that are in a row
         if tempStart == 0:
             tempStart = numb
@@ -92,11 +115,13 @@ for currentReadLine in BL_File:
         elif int(numb) > (int(tempLast) + 1):
             if int(tempLast) > 0:
                 print(currentFolder, tempStart + "-" + tempLast)
+                baselightCol.insert_one({currentFolder : f'{tempStart}-{tempLast}'})
                 with open(csvFilename, "a") as csvFile:
                     csvFile.write(f"{currentFolder},")
                     csvFile.write(f" {tempStart}-{tempLast},\n")
             else:
                 print(currentFolder, tempStart)
+                baselightCol.insert_one({currentFolder : f'{tempStart}'})
                 with open(csvFilename, "a") as csvFile:
                     csvFile.write(f"{currentFolder},")
                     csvFile.write(f" {tempStart}\n")
@@ -104,16 +129,35 @@ for currentReadLine in BL_File:
             tempLast = 0
     if int(tempLast) > 0:
         print(currentFolder, tempStart + "-" + tempLast)
+        baselightCol.insert_one({currentFolder : f'{tempStart}-{tempLast}'})
         with open(csvFilename, "a") as csvFile:
             csvFile.write(f"{currentFolder},")
             csvFile.write(f" {tempStart}-{tempLast},\n")
     else:
         print(currentFolder, tempStart)
+        baselightCol.insert_one({currentFolder : f'{tempStart}'})
         with open(csvFilename, "a") as csvFile:
             csvFile.write(f"{currentFolder},")
             csvFile.write(f" {tempStart},\n")
 
+    timeCode(currentFolder, tempStart, tempLast)
+
     csvFile.close
 
-#python3 Project3.py --baselight Baselight_export.txt --xytech Xytech.txt --process True
-#python3 Project3.py --baselight Baselight_export.txt --xytech Xytech.txt
+#process video file and call db
+if args.process:
+    print()
+    print('db data: ', db.list_collection_names())
+    for i in baselightCol.find({},{"_id":0}):
+        # timeCode()
+        print('Baselight db data: ', i[])
+
+    for j in xytechCol.find({},{"_id":0}):
+        print('Xytech db data: ', j)
+   
+
+baselightCol.drop()
+xytechCol.drop()
+
+
+#python Project3.py --baselight Baselight_export.txt --xytech Xytech.txt --process twitch_nft_demo.mp4
